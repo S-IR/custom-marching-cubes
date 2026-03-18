@@ -20,27 +20,61 @@ func pointsToUint8(points ...int) uint8 {
 
 func TestMarchingCubes(t *testing.T) {
 	indices := custom_marching_cubes()
+	var FRONT_FACE = [6]int{0, 2, 6, 0, 6, 4}
+	var TOP_FACE = [6]int{4, 6, 7, 4, 7, 5}
+	var BACK_FACE = [6]int{3, 1, 5, 3, 5, 7}
 
+	var LEFT_FACE = [6]int{
+		1, 0, 4, 1, 4, 5,
+	}
+	var RIGHT_FACE = [6]int{
+		2, 3, 7, 2, 7, 6,
+	}
+
+	var BOTTOM_FACE = [6]int{
+		0, 2, 3, 0, 3, 1,
+	}
+	var DIAGONAL_BL_TR = [6]int{
+		3, 0, 4, 3, 4, 7,
+	}
 	type TestStruct struct {
 		index           uint8
 		indicesExpected []int
 	}
+
 	structs := []TestStruct{
 		TestStruct{index: pointsToUint8(), indicesExpected: []int{}},
 		TestStruct{index: pointsToUint8(0), indicesExpected: []int{}},
 		TestStruct{index: pointsToUint8(7), indicesExpected: []int{}},
 
-		TestStruct{index: pointsToUint8(0, 2, 4, 6), indicesExpected: []int{0, 2, 6, 0, 6, 4}},
-		TestStruct{index: pointsToUint8(4, 5, 6, 7), indicesExpected: []int{4, 6, 7, 4, 7, 5}},
-		TestStruct{index: pointsToUint8(7, 6, 5, 4), indicesExpected: []int{4, 6, 7, 4, 7, 5}},
+		TestStruct{index: pointsToUint8(0, 2, 4, 6), indicesExpected: FRONT_FACE[:]},
+		TestStruct{index: pointsToUint8(4, 5, 6, 7), indicesExpected: TOP_FACE[:]},
 
-		TestStruct{index: pointsToUint8(1, 3, 5, 7), indicesExpected: []int{3, 1, 5, 3, 5, 7}},
+		TestStruct{index: pointsToUint8(7, 6, 5, 4), indicesExpected: TOP_FACE[:]},
+		// TestStruct{index: pointsToUint8(4, 6, 5, 7), indicesExpected: []int{4, 6, 7, 4, 7, 5}},
 
-		TestStruct{index: pointsToUint8(0, 4, 2, 6, 3, 7), indicesExpected: []int{0, 2, 6, 0, 6, 4, 2, 3, 7, 2, 7, 6, 3, 0, 4, 3, 4, 7, 4, 6, 7, 3, 0, 2}},
+		TestStruct{index: pointsToUint8(1, 3, 5, 7), indicesExpected: BACK_FACE[:]},
 
-		TestStruct{index: pointsToUint8(0, 4, 2, 6, 3, 7, 1), indicesExpected: []int{0, 2, 6, 0, 6, 4, 2, 3, 7, 2, 7, 6, 4, 6, 7, 3, 0, 2, 3, 1, 0, 1, 0, 4, 3, 1, 7, 1, 0, 4, 7, 4, 6}},
+		TestStruct{index: pointsToUint8(0, 4, 2, 6, 3, 7), indicesExpected: concat(
+			TOP_FACE[:], RIGHT_FACE[:], DIAGONAL_BL_TR[:], []int{4, 6, 7, 3, 0, 2},
+		)},
+
+		TestStruct{index: pointsToUint8(0, 4, 2, 6, 3, 7, 1), indicesExpected: concat(
+			TOP_FACE[:], RIGHT_FACE[:], []int{4, 6, 7, 3, 0, 2, 3, 1, 0, 1, 0, 4, 3, 1, 7, 1, 0, 4, 7, 4, 6},
+		)},
 
 		TestStruct{index: pointsToUint8(0, 2, 5, 7), indicesExpected: []int{0, 2, 7, 0, 5, 7}},
+
+		TestStruct{
+			index: pointsToUint8(0, 1, 2, 3, 4, 5, 6, 7),
+			indicesExpected: concat(FRONT_FACE[:],
+				BACK_FACE[:],
+				RIGHT_FACE[:],
+				LEFT_FACE[:],
+				TOP_FACE[:],
+				BOTTOM_FACE[:]),
+		},
+
 		// TestStruct{index: pointsToUint8(1, 3, 4, 6), indicesExpected: []int{}},
 
 		// TestStruct{index: pointsToUint8(0,1,4,5,3,7,2), indicesExpected: []int{}},
@@ -70,4 +104,11 @@ func TestMarchingCubes(t *testing.T) {
 		}
 
 	}
+}
+func concat(faces ...[]int) []int {
+	var result []int
+	for _, f := range faces {
+		result = append(result, f...)
+	}
+	return result
 }

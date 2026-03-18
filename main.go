@@ -13,6 +13,7 @@ func ccw_add_faces(left, right, topLeft, topRight Point) (res []int) {
 	}
 	if left.p && topRight.p && topLeft.p {
 		res = append(res, left.i, topRight.i, topLeft.i)
+
 	}
 
 	if !left.p && right.p && topLeft.p && topRight.p {
@@ -84,9 +85,6 @@ func custom_marching_cubes() [256][]int {
 		has5 := i&(1<<5) != 0
 		has6 := i&(1<<6) != 0
 		has7 := i&(1<<7) != 0
-		if has0 && has2 && has5 && has7 {
-			fmt.Println("here")
-		}
 
 		p0 := Point{p: has0, i: 0}
 		p1 := Point{p: has1, i: 1}
@@ -101,11 +99,13 @@ func custom_marching_cubes() [256][]int {
 		indices := []int{}
 
 		indices = append(indices, ccw_add_faces(p0, p2, p4, p6)...)
+		// indices = append(indices, ccw_add_faces(p3, p1, p7, p5)...)
+
 		indices = append(indices, ccw_add_faces(p1, p0, p5, p4)...)
-		indices = append(indices, ccw_add_faces(p2, p3, p6, p7)...)
-		indices = append(indices, ccw_add_faces(p4, p6, p5, p7)...)
-		indices = append(indices, ccw_add_faces(p3, p1, p7, p5)...)
-		indices = append(indices, ccw_add_faces(p3, p1, p2, p0)...)
+		// indices = append(indices, ccw_add_faces(p2, p3, p6, p7)...)
+
+		// indices = append(indices, ccw_add_faces(p7, p5, p6, p4)...)
+		indices = append(indices, ccw_add_faces(p1, p3, p0, p2)...)
 
 		indices = append(indices, ccw_add_edges(p2, p6, p0, p3, p4, p7, p1, p5)...)
 		indices = append(indices, ccw_add_edges(p0, p4, p1, p2, p5, p6, p3, p7)...)
@@ -121,6 +121,38 @@ func custom_marching_cubes() [256][]int {
 		finalIndices[i] = indices
 
 	}
+	// maxLen := 36
+
+	fmt.Println("POINTS_TO_TRIANGLES_CONVERTER:=[256][]i32{")
+
+	for _, p := range finalIndices {
+		fmt.Print("{")
+		totalPrinted := 0
+		for _, indices := range p {
+			if totalPrinted == (len(p) - 1) {
+				fmt.Printf("%d", indices)
+			} else {
+				fmt.Printf("%d,", indices)
+
+			}
+			totalPrinted += 1
+
+		}
+		// diff := maxLen - len(p)
+		// for j := 0; j < diff; j += 1 {
+		// 	if totalPrinted == (maxLen - 1) {
+		// 		fmt.Printf("%d", -1)
+		// 	} else {
+		// 		fmt.Printf("%d,", -1)
+		// 	}
+		// 	totalPrinted += 1
+
+		// }
+		fmt.Println("},")
+
+	}
+	fmt.Println("};")
+
 	return finalIndices
 }
 func main() {
